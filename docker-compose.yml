@@ -1,0 +1,27 @@
+services:
+  # Apache Drill chạy trong Docker; backend Spring Boot chạy riêng trên máy host.
+  drill:
+    image: supermarket-bigdata-drill:1.21.2
+    build:
+      context: ./drill
+      dockerfile: Dockerfile
+    container_name: supermarket-bigdata-drill
+    restart: unless-stopped
+    command: ["/opt/drill/bin/drill-embedded"]
+    stdin_open: true
+    tty: true
+    ports:
+      - "${DRILL_HTTP_PORT:-8047}:8047"
+      - "${DRILL_JDBC_PORT:-31010}:31010"
+    volumes:
+      - drill-data:/data
+      - ./analytics:/analytics:rw
+    networks:
+      - supermarket-bigdata-network
+
+networks:
+  supermarket-bigdata-network:
+    driver: bridge
+
+volumes:
+  drill-data:

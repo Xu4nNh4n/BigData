@@ -1,0 +1,149 @@
+import React from 'react';
+import { NavLink } from 'react-router-dom';
+import {
+  LayoutDashboard,
+  Package,
+  Layers,
+  Boxes,
+  ShoppingCart,
+  Receipt,
+  Truck,
+  Users,
+  BarChart3,
+  Store,
+  UserCheck,
+} from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
+
+interface SidebarProps {
+  isMobileOpen: boolean;
+  onCloseMobile: () => void;
+}
+
+export const Sidebar: React.FC<SidebarProps> = ({ isMobileOpen, onCloseMobile }) => {
+  const { role } = useAuth();
+
+  const navSections = [
+    {
+      title: 'TỔNG QUAN',
+      items: [
+        { to: '/admin', label: 'Bàn làm việc (Dashboard)', icon: LayoutDashboard, roles: ['ADMIN', 'MANAGER'] },
+      ],
+    },
+    {
+      title: 'BÁN HÀNG & THU NGÂN',
+      items: [
+        { to: '/pos', label: 'Thu ngân tại quầy (POS)', icon: ShoppingCart, roles: ['ADMIN', 'MANAGER', 'STAFF'] },
+        { to: '/orders', label: 'Quản lý đơn & Trả hàng', icon: Receipt, roles: ['ADMIN', 'MANAGER', 'STAFF'] },
+        { to: '/customers', label: 'Khách hàng & Thành viên', icon: Users, roles: ['ADMIN', 'MANAGER', 'STAFF'] },
+      ],
+    },
+    {
+      title: 'QUẢN LÝ HÀNG HÓA',
+      items: [
+        { to: '/products', label: 'Sản phẩm & Giá bán', icon: Package, roles: ['ADMIN', 'MANAGER', 'STAFF', 'WAREHOUSE'] },
+        { to: '/categories', label: 'Danh mục ngành hàng', icon: Layers, roles: ['ADMIN', 'MANAGER'] },
+        { to: '/inventory', label: 'Kho & Lô hàng FEFO', icon: Boxes, roles: ['ADMIN', 'MANAGER', 'WAREHOUSE'] },
+      ],
+    },
+    {
+      title: 'ĐỐI TÁC & NHẬP HÀNG',
+      items: [
+        { to: '/suppliers', label: 'Nhà cung cấp', icon: Truck, roles: ['ADMIN', 'MANAGER', 'WAREHOUSE'] },
+      ],
+    },
+    {
+      title: 'BÁO CÁO & DỮ LIỆU',
+      items: [
+        { to: '/reports', label: 'Đối soát & Big Data', icon: BarChart3, roles: ['ADMIN', 'MANAGER'] },
+      ],
+    },
+    {
+      title: 'HỆ THỐNG & NHÂN SỰ',
+      items: [
+        { to: '/users', label: 'Quản lý nhân viên', icon: UserCheck, roles: ['ADMIN'] },
+      ],
+    },
+    {
+      title: 'KÊNH TRỰC TUYẾN',
+      items: [
+        { to: '/', label: 'Cửa hàng Online (Khách xem)', icon: Store, roles: ['ADMIN', 'MANAGER', 'STAFF', 'CUSTOMER'] },
+      ],
+    },
+  ];
+
+  return (
+    <>
+      {/* Mobile backdrop */}
+      {isMobileOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-2xs lg:hidden"
+          onClick={onCloseMobile}
+        />
+      )}
+
+      {/* Sidebar container */}
+      <aside
+        className={`fixed top-0 bottom-0 left-0 z-40 w-64 bg-white border-r border-gray-200/80 flex flex-col transition-transform duration-200 ease-in-out lg:translate-x-0 ${
+          isMobileOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
+        {/* Brand header */}
+        <div className="h-16 flex items-center gap-3 px-5 border-b border-gray-100 bg-white">
+          <div className="w-9 h-9 rounded-lg bg-emerald-600 flex items-center justify-center text-white shadow-xs">
+            <Store className="w-5 h-5" />
+          </div>
+          <div>
+            <h1 className="text-sm font-bold text-gray-900 tracking-tight leading-none">SUPERMARKET</h1>
+            <p className="text-[11px] text-emerald-700 font-medium tracking-wide mt-0.5">Inventory & POS System</p>
+          </div>
+        </div>
+
+        {/* Navigation items */}
+        <div className="flex-1 overflow-y-auto py-4 px-3 space-y-6">
+          {navSections.map((section) => {
+            const filteredItems = section.items.filter(
+              (item) => !role || item.roles.includes(role)
+            );
+            if (filteredItems.length === 0) return null;
+
+            return (
+              <div key={section.title}>
+                <h4 className="px-3 mb-2 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
+                  {section.title}
+                </h4>
+                <nav className="space-y-0.5">
+                  {filteredItems.map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <NavLink
+                        key={item.to}
+                        to={item.to}
+                        onClick={onCloseMobile}
+                        className={({ isActive }) =>
+                          `flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
+                            isActive
+                              ? 'bg-emerald-50 text-emerald-700 font-semibold'
+                              : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                          }`
+                        }
+                      >
+                        <Icon className="w-4 h-4 shrink-0" />
+                        <span>{item.label}</span>
+                      </NavLink>
+                    );
+                  })}
+                </nav>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Footer info */}
+        <div className="p-3 border-t border-gray-100 text-center bg-gray-50/50">
+          <p className="text-[11px] text-gray-400">Phiên bản Retail v2.6 • Spring Boot 3</p>
+        </div>
+      </aside>
+    </>
+  );
+};
